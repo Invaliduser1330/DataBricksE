@@ -1,0 +1,19 @@
+DatabricksExtension/
+├── vsix/                          # C# Visual Studio Extension
+│   ├── DatabricksExtension.csproj
+│   ├── DatabricksToolWindow.cs    # Tool window host
+│   ├── DatabricksPackage.cs       # Extension entry point
+│   └── source.extension.vsixmanifest
+│
+├── python_backend/                # Python + Databricks SDK
+│   ├── server.py                  # Flask API server
+│   ├── jobs.py                    # Job management
+│   ├── clusters.py                # Cluster management
+│   ├── dbfs.py                    # File/DBFS management
+│   ├── notebooks.py               # Notebook browsing
+│   └── requirements.txt
+│
+└── frontend/                      # HTML/JS UI (loaded in WebView2)
+    ├── index.html
+    ├── app.js
+    └── styles.css

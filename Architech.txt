@@ -1,0 +1,8 @@
+VS Professional Extension (VSIX - C# Shell)
+        │
+        ▼
+  WebView2 Tool Window  ←──→  Local Python Server (Flask + databricks-sdk)
+        │                              │
+        ▼                              ▼
+  Databricks UI Panel          Azure Databricks Workspace
+  (HTML/JS Frontend)           (Jobs, Clusters, DBFS, Notebooks)
