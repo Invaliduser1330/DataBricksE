@@ -1,0 +1,15 @@
+# Databricks VS Extension – Python Backend Dependencies
+
+# Databricks
+databricks-sdk>=0.20.0
+databricks-connect>=13.0.0
+
+# Web server
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Azure AD OAuth token exchange
+requests>=2.31.0
+
+# Decode id_token claims (user name/email from interactive login)
+PyJWT>=2.8.0

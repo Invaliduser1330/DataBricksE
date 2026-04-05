@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Databricks Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo">⬡ Databricks</div>
+  <div class="sep"></div>
+  <div id="ws-badge">workspace: loading...</div>
+  <div id="user-pill" style="display:none">
+    <span id="user-avatar">👤</span>
+    <span id="user-name"></span>
+  </div>
+  <div id="conn-status" title="Connected"></div>
+  <button class="btn btn-ghost btn-sm" onclick="openConfig()">⚙ Config</button>
+  <button class="btn btn-ghost btn-sm" id="logout-btn" style="display:none" onclick="logout()">⏻ Logout</button>
+</div>
+
+<div id="layout">
+
+  <div id="sidebar">
+    <button class="nav-btn active" onclick="showTab('clusters', this)">
+      ⬡<span class="tooltip">Clusters</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('jobs', this)">
+      ▶<span class="tooltip">Jobs</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('runs', this)">
+      ◎<span class="tooltip">Job Runs</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('notebooks', this)">
+      ☰<span class="tooltip">Notebooks</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('dbfs', this)">
+      ◫<span class="tooltip">DBFS Files</span>
+    </button>
+  </div>
+
+  <div id="main">
+
+    <div id="login-screen">
+      <div class="login-box">
+        <div class="login-logo">⬡</div>
+        <div class="login-title">Databricks Explorer</div>
+        <div class="login-sub">Sign in to connect to your Databricks workspace</div>
+        
+        <button class="btn-ms" onclick="startOAuth()">
+          <svg width="20" height="20" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
+            <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
+            <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
+            <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+          </svg>
+          Sign in with Microsoft
+        </button>
+
+        <button class="btn-google" onclick="startGoogleOAuth()">
+          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+            <path d="M3.964 10.707a5.416 5.416 0 010-3.414V4.961H.957a8.997 8.997 0 000 8.078l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.961L3.964 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
+          </svg>
+          Sign in with Google
+        </button>
+
+        <div class="login-divider">or use a Service Principal</div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:4px" onclick="openConfig()">Configure Service Principal</button>
+        <div class="login-note">OAuth 2.0 · Multi-Cloud · Secure</div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-clusters">
+      <div class="section-header">
+        <div class="section-title">Clusters</div>
+        <div class="sep"></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadClusters()">↻ Refresh</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" placeholder="Search clusters..." oninput="filterList('cluster-list', this.value)"/>
+      </div>
+      <div class="scroll-area" id="cluster-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-jobs">
+      <div class="section-header">
+        <div class="section-title">Jobs</div>
+        <div class="sep"></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadJobs()">↻ Refresh</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" placeholder="Search jobs..." oninput="filterList('job-list', this.value)"/>
+      </div>
+      <div class="scroll-area" id="job-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-runs">
+      <div class="section-header">
+        <div class="section-title">Job Runs</div>
+        <div class="sep"></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadRuns()">↻ Refresh</button>
+      </div>
+      <div class="scroll-area" id="runs-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-notebooks">
+      <div class="section-header">
+        <div class="section-title">Notebooks</div>
+        <div class="sep"></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadNotebooks(currentNbPath)">↻ Refresh</button>
+      </div>
+      <div class="dbfs-path-bar">
+        📁 <input id="nb-path-input" value="/" onkeydown="if(event.key==='Enter') loadNotebooks(this.value)"/>
+      </div>
+      <div class="scroll-area" id="notebook-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-dbfs">
+      <div class="section-header">
+        <div class="section-title">DBFS Files</div>
+        <div class="sep"></div>
+        <label class="btn btn-primary btn-sm" for="file-upload">⬆ Upload</label>
+        <input type="file" id="file-upload" style="display:none" onchange="uploadFile(this)"/>
+        <button class="btn btn-ghost btn-sm" onclick="loadDBFS(currentDbfsPath)">↻ Refresh</button>
+      </div>
+      <div class="dbfs-path-bar">
+        💾 <input id="dbfs-path-input" value="/" onkeydown="if(event.key==='Enter') loadDBFS(this.value)"/>
+      </div>
+      <div class="scroll-area" id="dbfs-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="config-modal">
+  <div class="modal-box">
+    <div class="modal-title">🔐 OAuth Configuration</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('sp', this)">Service Principal</button>
+      <button class="auth-tab" onclick="switchAuthTab('interactive', this)">Azure Interactive</button>
+      <button class="auth-tab" onclick="switchAuthTab('google', this)">Google OAuth</button>
+    </div>
+
+    <div id="auth-sp">
+      <div class="form-group"><label>Host URL</label><input id="cfg-host" /></div>
+      <div class="form-group"><label>Tenant ID</label><input id="cfg-tenant" /></div>
+      <div class="form-group"><label>Client ID</label><input id="cfg-client-id" /></div>
+      <div class="form-group"><label>Client Secret</label><input id="cfg-client-secret" type="password" /></div>
+      <div class="form-group"><label>Port</label><input id="cfg-port" value="5050" /></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeConfig()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSpConfig()">Connect</button>
+      </div>
+    </div>
+
+    <div id="auth-interactive" style="display:none">
+      <div class="form-group"><label>Host URL</label><input id="cfg-host-interactive" /></div>
+      <div class="form-group"><label>Tenant ID</label><input id="cfg-tenant-interactive" /></div>
+      <div class="form-group"><label>Port</label><input id="cfg-port-interactive" value="5050" /></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeConfig()">Cancel</button>
+        <button class="btn-ms btn-ms-sm" onclick="saveInteractiveConfig()">Login with Microsoft</button>
+      </div>
+    </div>
+
+    <div id="auth-google" style="display:none">
+      <div class="form-group"><label>Host URL</label><input id="cfg-host-google" /></div>
+      <div class="form-group"><label>Google Client ID</label><input id="cfg-client-id-google" /></div>
+      <div class="form-group"><label>Port</label><input id="cfg-port-google" value="5050" /></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeConfig()">Cancel</button>
+        <button class="btn-google btn-google-sm" onclick="saveGoogleConfig()">Login with Google</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="oauth-overlay">
+  <div class="oauth-waiting">
+    <div class="oauth-spinner"></div>
+    <div class="oauth-waiting-title">Waiting for Login</div>
+    <div class="oauth-waiting-sub">A browser window has opened. Please complete the sign-in.</div>
+    <button class="btn btn-ghost" style="margin-top:16px" onclick="cancelOAuth()">Cancel</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
